@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.mypy_cache/
+
+# Environments and local configuration
+.venv/
+venv/
+env/
+.env
+.vscode/
+.idea/
+
+# OS/editor files
+.DS_Store
+*.swp
+*~
+
+# Generated training data and outputs
+learned_osqp/data/*
+!learned_osqp/data/README.md
+learned_osqp/checkpoints/
+learned_osqp/results/
+results/
+*.log
+slurm-*.out
+slurm-*.err
+
+# Packaging/build artifacts
+build/
+dist/
+*.egg-info/

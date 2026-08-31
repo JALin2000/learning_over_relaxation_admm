@@ -1,0 +1,41 @@
+problem,n,instance,solver,status,iter,rho_updates,obj_val
+Random QP,500,0,OSQP_python_arho,optimal,456,0.0,19131.52316445275
+Random QP,500,0,OSQP_python_no_arho,optimal,456,0.0,19131.52316445275
+Random QP,500,0,OSQP_python_neural_mlp_scalar_arho_best_iter,optimal,364,0.0,19131.232652886316
+Random QP,500,0,OSQP_python_neural_mlp_scalar_arho_best_rho,optimal,364,0.0,19131.232652886316
+Random QP,500,0,OSQP_python_neural_mlp_vector_arho_best_iter,optimal,367,0.0,19130.969454870996
+Random QP,500,0,OSQP_python_neural_mlp_vector_arho_best_rho,optimal,364,0.0,19131.128032553555
+Random QP,500,0,OSQP_python_neural_mlp_scalar_no_arho_best_iter,optimal,365,0.0,19131.230269468542
+Random QP,500,0,OSQP_python_neural_mlp_vector_no_arho_best_iter,optimal,375,0.0,19131.541655175173
+Portfolio,50,0,OSQP_python_arho,optimal,259,1.0,-5.279533129848396
+Portfolio,50,0,OSQP_python_no_arho,optimal,433,0.0,-7.53590163820749
+Portfolio,50,0,OSQP_python_neural_mlp_scalar_arho_best_iter,optimal,192,1.0,-7.4330388835123244
+Portfolio,50,0,OSQP_python_neural_mlp_scalar_arho_best_rho,optimal,318,1.0,-6.695714636217059
+Portfolio,50,0,OSQP_python_neural_mlp_vector_arho_best_iter,optimal,195,1.0,-6.618980446726413
+Portfolio,50,0,OSQP_python_neural_mlp_vector_arho_best_rho,optimal,371,1.0,-5.8662207748180615
+Portfolio,50,0,OSQP_python_neural_mlp_scalar_no_arho_best_iter,optimal,355,0.0,-7.536177036731947
+Portfolio,50,0,OSQP_python_neural_mlp_vector_no_arho_best_iter,optimal,355,0.0,-7.540535930970768
+Lasso,50,0,OSQP_python_arho,optimal,130,1.0,5149.427773979009
+Lasso,50,0,OSQP_python_no_arho,optimal,207,0.0,5148.14289755567
+Lasso,50,0,OSQP_python_neural_mlp_scalar_arho_best_iter,optimal,131,1.0,5149.345704839555
+Lasso,50,0,OSQP_python_neural_mlp_scalar_arho_best_rho,optimal,198,2.0,5148.350392552912
+Lasso,50,0,OSQP_python_neural_mlp_vector_arho_best_iter,optimal,209,1.0,5149.891502942664
+Lasso,50,0,OSQP_python_neural_mlp_vector_arho_best_rho,optimal,177,0.0,5148.082469635801
+Lasso,50,0,OSQP_python_neural_mlp_scalar_no_arho_best_iter,optimal,174,0.0,5147.946925521341
+Lasso,50,0,OSQP_python_neural_mlp_vector_no_arho_best_iter,optimal,173,0.0,5148.47316358343
+SVM,50,0,OSQP_python_arho,optimal,274,1.0,2031.6378782216273
+SVM,50,0,OSQP_python_no_arho,optimal,626,0.0,2031.6376697320525
+SVM,50,0,OSQP_python_neural_mlp_scalar_arho_best_iter,optimal,239,1.0,2031.6385092279572
+SVM,50,0,OSQP_python_neural_mlp_scalar_arho_best_rho,optimal,349,1.0,2031.6503497471308
+SVM,50,0,OSQP_python_neural_mlp_vector_arho_best_iter,optimal,234,1.0,2031.6386713182403
+SVM,50,0,OSQP_python_neural_mlp_vector_arho_best_rho,optimal,267,1.0,2031.640037330463
+SVM,50,0,OSQP_python_neural_mlp_scalar_no_arho_best_iter,optimal,523,0.0,2031.6389755117511
+SVM,50,0,OSQP_python_neural_mlp_vector_no_arho_best_iter,optimal,522,0.0,2031.6376799237296
+Control,200,0,OSQP_python_arho,optimal,82,1.0,34.97578171944965
+Control,200,0,OSQP_python_no_arho,optimal,689,0.0,34.913968741300366
+Control,200,0,OSQP_python_neural_mlp_scalar_arho_best_iter,optimal,83,1.0,34.973935650504785
+Control,200,0,OSQP_python_neural_mlp_scalar_arho_best_rho,optimal,200,2.0,34.944214600233096
+Control,200,0,OSQP_python_neural_mlp_vector_arho_best_iter,optimal,91,1.0,34.91999410419565
+Control,200,0,OSQP_python_neural_mlp_vector_arho_best_rho,optimal,145,1.0,34.91842455787166
+Control,200,0,OSQP_python_neural_mlp_scalar_no_arho_best_iter,optimal,568,0.0,34.913919379920316
+Control,200,0,OSQP_python_neural_mlp_vector_no_arho_best_iter,optimal,565,0.0,34.91395340998838
