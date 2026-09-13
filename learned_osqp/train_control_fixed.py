@@ -125,6 +125,11 @@ def main():
     parser.add_argument('--stages', type=int, default=2000, help='max stages')
     parser.add_argument('--n_train', type=int, default=160)
     parser.add_argument('--n_val', type=int, default=80)
+    parser.add_argument('--data-dir', '--data_dir', dest='data_dir', type=str,
+                        default='learned_osqp/data',
+                        help='directory used to cache generated datasets '
+                             '(default: learned_osqp/data; relative paths are '
+                             'resolved from the current working directory)')
     parser.add_argument('--regen', action='store_true',
                         help='regenerate dataset')
     parser.add_argument('--loss', type=str, default='log_convergence',
@@ -170,8 +175,7 @@ def main():
         store_spectral_matrices=(args.loss == 'spectral_radius'),
         qp_types=['control'],
         qp_type_sizes={'control': args.nx},
-        # data_dir='learned_osqp/data',
-        data_dir='/data/engs-goulart/sedm7756/0319_feat_pri_dua_res_scaled_alpha_1.25_1.95',
+        data_dir=args.data_dir,
     )
 
     device = torch.device(args.device)

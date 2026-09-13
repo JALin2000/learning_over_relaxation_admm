@@ -1,5 +1,4 @@
 # Direct dependencies only (not a full `pip freeze`).
-# Versions are from the local `rlqp` environment used for the release smoke tests.
 numpy==2.3.4
 scipy==1.16.3
 pandas==2.3.3
@@ -7,12 +6,3 @@ matplotlib==3.10.7
 cvxpy==1.7.5
 osqp==1.0.5
 torch==2.9.1
-
-# Imported eagerly by the unchanged legacy solver registry, although the paper
-# experiments do not call these commercial solver backends.
-gurobipy==13.0.0
-Mosek==11.0.30
-
-# Imported by the unchanged, out-of-paper SuiteSparse continuation at the end
-# of test_neural_comparison.py. The large SuiteSparse matrices are not bundled.
-tables==3.11.1

@@ -844,6 +844,11 @@ if __name__ == '__main__':
     parser.add_argument('--T', type=int, default=10, help='steps per stage')
     parser.add_argument('--stages', type=int, default=2000, help='max stages')
     parser.add_argument('--n_train', type=int, default=160)
+    parser.add_argument('--data-dir', '--data_dir', dest='data_dir', type=str,
+                        default='learned_osqp/data',
+                        help='directory used to cache generated datasets '
+                             '(default: learned_osqp/data; relative paths are '
+                             'resolved from the current working directory)')
     parser.add_argument('--regen', action='store_true', help='regenerate dataset(s)')
     parser.add_argument('--loss', type=str, default='log_convergence',
                         choices=['log_convergence', 'spectral_radius', 'scaled_residual'],
@@ -905,8 +910,7 @@ if __name__ == '__main__':
         store_spectral_matrices=(args.loss == 'spectral_radius'),
         qp_types=types_list,
         qp_type_sizes=qp_type_sizes,
-        # data_dir='learned_osqp/data',
-        data_dir='/data/engs-goulart/sedm7756/0319_feat_pri_dua_res_scaled_alpha_1.25_1.95',
+        data_dir=args.data_dir,
     )
 
     if args.regen:

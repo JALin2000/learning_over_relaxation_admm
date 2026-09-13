@@ -10,21 +10,21 @@ in `problem_classes/`. For the paper configuration, each benchmark family used
 160 training and 80 validation instances. The fixed-control experiment used one
 shared system (`dynamics_seed=0`) and varied the initial-state seed.
 
-## Important portability note
+## Cache location
 
-The unchanged entry points `learned_osqp/train.py` and
-`learned_osqp/train_control_fixed.py` still set `Config.data_dir` to the
-original ARC path:
+Both training entry points default to the repository-relative cache directory
+`learned_osqp/data`. Run them from the repository root so that this relative
+path resolves as shown here. A different cache location can be selected with
+either spelling of the command-line option:
 
-```text
-/data/engs-goulart/sedm7756/0319_feat_pri_dua_res_scaled_alpha_1.25_1.95
+```bash
+python learned_osqp/train.py --data-dir path/to/data ...
+python learned_osqp/train_control_fixed.py --data_dir path/to/data ...
 ```
 
-There is currently no `--data-dir` command-line option. Before retraining on a
-different machine, change that argument to `learned_osqp/data` (the commented
-relative path immediately above it shows the intended local value), or add a
-portable CLI option in a follow-up cleanup. This release deliberately does not
-alter those existing Python files.
+If the expected `.pt` cache is absent, the entry point generates it and saves
+it under this directory. On a later run with the same problem configuration,
+the cached file is loaded instead. Pass `--regen` to replace the matching cache.
 
 Generated `.pt` datasets are ignored by Git and should normally be hosted as a
 separate release asset if exact training data later become available.

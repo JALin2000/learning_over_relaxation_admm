@@ -3,12 +3,27 @@ from solvers.superadmm import SuperADMMSolver
 from solvers.superadmmdual import SuperADMMDualSolver
 from solvers.superadmm_tricks import SuperADMMTricksSolver
 from solvers.ecos import ECOSSolver
-from solvers.gurobi import GUROBISolver
-from solvers.mosek import MOSEKSolver
 from solvers.osqp import OSQPSolver
 from solvers.osqppurepy import OSQP as OSQPPythonSolver
 from learned_osqp.neural_osqp_solver import NeuralOSQPSolver
 # from solvers.qpoases import qpOASESSolver
+
+# These inherited commercial backends are not used by the paper experiments.
+# Keep them available when their Python packages are installed, without making
+# either package a mandatory dependency for the OSQP-only release workflow.
+try:
+    from solvers.gurobi import GUROBISolver
+except ModuleNotFoundError as exc:
+    if exc.name != 'gurobipy':
+        raise
+    GUROBISolver = None
+
+try:
+    from solvers.mosek import MOSEKSolver
+except ModuleNotFoundError as exc:
+    if exc.name != 'mosek':
+        raise
+    MOSEKSolver = None
 
 ECOS = 'ECOS'
 ECOS_high = ECOS + "_high"
@@ -62,10 +77,6 @@ SOLVER_MAP = {OSQP: OSQPSolver,
               OSQP_high: OSQPSolver,
               OSQP_polish: OSQPSolver,
               OSQP_polish_high: OSQPSolver,
-              GUROBI: GUROBISolver,
-              GUROBI_high: GUROBISolver,
-              MOSEK: MOSEKSolver,
-              MOSEK_high: MOSEKSolver,
               ECOS: ECOSSolver,
               ECOS_high: ECOSSolver,
               # qpOASES: qpOASESSolver,
@@ -99,6 +110,11 @@ SOLVER_MAP = {OSQP: OSQPSolver,
               OSQP_python_high: OSQPPythonSolver,
               OSQP_python_neural: NeuralOSQPSolver,
               }
+
+if GUROBISolver is not None:
+    SOLVER_MAP.update({GUROBI: GUROBISolver, GUROBI_high: GUROBISolver})
+if MOSEKSolver is not None:
+    SOLVER_MAP.update({MOSEK: MOSEKSolver, MOSEK_high: MOSEKSolver})
 
 time_limit = 1000. # Seconds
 eps_low = 1e-03
