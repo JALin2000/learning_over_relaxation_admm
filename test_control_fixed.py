@@ -8,6 +8,7 @@ validation (n_train..n_train+n_val-1).
 Usage:
     python test_control_fixed.py --mode benchmark
     python test_control_fixed.py --mode plot
+    python test_control_fixed.py --mode benchmark --aradmm-only
 '''
 
 import os
@@ -19,6 +20,7 @@ from functools import partial
 import solvers.solvers as s
 from problem_classes.control import ControlExample
 from solvers.osqppurepy import OSQP as OSQPPythonSolver
+from solvers.aradmm import ARADMMOSQPSolver
 from learned_osqp.neural_osqp_solver import NeuralOSQPSolver
 from utils.general import make_sure_path_exists
 from utils.plot_alpha import plot_alpha_history, plot_alpha_change
@@ -43,6 +45,8 @@ parser.add_argument('--precision', type=str, default='low',
 parser.add_argument('--ckpt_dir', type=str,
                     default=os.path.join('learned_osqp', 'checkpoints_arc',
                                          '0324_control_fixed'))
+parser.add_argument('--aradmm-only', action='store_true',
+                    help='Run only ARADMM using the Table 2 problems/settings')
 args = parser.parse_args()
 
 nx = args.nx
@@ -53,6 +57,7 @@ n_test = args.n_test if args.mode == 'benchmark' else 3
 mode = args.mode
 precision = args.precision
 CHECKPOINT_DIR = args.ckpt_dir
+aradmm_only = args.aradmm_only
 
 # Test x0 seeds start AFTER train + val
 x0_seed_offset = n_train + n_val  # 240 by default
@@ -62,6 +67,7 @@ print(f'n_train={n_train}, n_val={n_val}, n_test={n_test}')
 print(f'x0 test seeds: {x0_seed_offset} .. {x0_seed_offset + n_test - 1}')
 print(f'mode={mode}, precision={precision}')
 print(f'checkpoint dir: {CHECKPOINT_DIR}')
+print(f'ARADMM only: {aradmm_only}')
 
 # --------------------------------------------------------------------------- #
 # OSQP settings
@@ -109,40 +115,52 @@ def _ckpt_path(arho: bool, alpha_mode: str, model_type: str,
 solver_names = []
 
 # Baseline: OSQP with adaptive rho
-name = 'OSQP_python_arho'
-s.SOLVER_MAP[name] = OSQPPythonSolver
-s.settings[name] = _make_settings(adaptive_rho=True)
-solver_names.append(name)
+if not aradmm_only:
+    name = 'OSQP_python_arho'
+    s.SOLVER_MAP[name] = OSQPPythonSolver
+    s.settings[name] = _make_settings(adaptive_rho=True)
+    solver_names.append(name)
 
-# Baseline: OSQP without adaptive rho
-name = 'OSQP_python_no_arho'
-s.SOLVER_MAP[name] = OSQPPythonSolver
+# ARADMM: jointly adaptive scalar rho and scalar alpha
+name = 'OSQP_python_aradmm'
+s.SOLVER_MAP[name] = partial(
+    ARADMMOSQPSolver,
+    record_history=(mode == 'plot'),
+)
 s.settings[name] = _make_settings(adaptive_rho=False)
 solver_names.append(name)
 
+# Baseline: OSQP without adaptive rho
+if not aradmm_only:
+    name = 'OSQP_python_no_arho'
+    s.SOLVER_MAP[name] = OSQPPythonSolver
+    s.settings[name] = _make_settings(adaptive_rho=False)
+    solver_names.append(name)
+
 # Neural variants
 record_history = (mode == 'plot')
-for model_type in ['mlp']:
-    for arho in [True, False]:
-        arho_str = 'arho' if arho else 'no_arho'
-        ckpt_types = ['best_iter', 'best_rho'] if arho else ['best_iter']
-        for alpha_mode in ['scalar', 'vector']:
-            for ckpt_type in ckpt_types:
-                ckpt = _ckpt_path(arho, alpha_mode, model_type, ckpt_type)
-                if not os.path.isfile(ckpt):
-                    print(f'  [skip] {ckpt} not found')
-                    continue
-                name = (f'OSQP_python_neural_{model_type}_{alpha_mode}'
-                        f'_{arho_str}_{ckpt_type}')
-                s.SOLVER_MAP[name] = partial(
-                    NeuralOSQPSolver,
-                    checkpoint_path=ckpt,
-                    alpha_mode=alpha_mode,
-                    model_type=model_type,
-                    record_history=record_history,
-                )
-                s.settings[name] = _make_settings(adaptive_rho=arho)
-                solver_names.append(name)
+if not aradmm_only:
+    for model_type in ['mlp']:
+        for arho in [True, False]:
+            arho_str = 'arho' if arho else 'no_arho'
+            ckpt_types = ['best_iter', 'best_rho'] if arho else ['best_iter']
+            for alpha_mode in ['scalar', 'vector']:
+                for ckpt_type in ckpt_types:
+                    ckpt = _ckpt_path(arho, alpha_mode, model_type, ckpt_type)
+                    if not os.path.isfile(ckpt):
+                        print(f'  [skip] {ckpt} not found')
+                        continue
+                    name = (f'OSQP_python_neural_{model_type}_{alpha_mode}'
+                            f'_{arho_str}_{ckpt_type}')
+                    s.SOLVER_MAP[name] = partial(
+                        NeuralOSQPSolver,
+                        checkpoint_path=ckpt,
+                        alpha_mode=alpha_mode,
+                        model_type=model_type,
+                        record_history=record_history,
+                    )
+                    s.settings[name] = _make_settings(adaptive_rho=arho)
+                    solver_names.append(name)
 
 if args.verbose:
     for name in solver_names:

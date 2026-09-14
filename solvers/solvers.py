@@ -5,6 +5,7 @@ from solvers.superadmm_tricks import SuperADMMTricksSolver
 from solvers.ecos import ECOSSolver
 from solvers.osqp import OSQPSolver
 from solvers.osqppurepy import OSQP as OSQPPythonSolver
+from solvers.aradmm import ARADMMOSQPSolver
 from learned_osqp.neural_osqp_solver import NeuralOSQPSolver
 # from solvers.qpoases import qpOASESSolver
 
@@ -68,6 +69,7 @@ Super_cg_precond_high = Super_cg_precond + '_high'
 
 OSQP_python = 'OSQP_python'
 OSQP_python_high = OSQP_python + '_high'
+OSQP_python_aradmm = OSQP_python + '_aradmm'
 OSQP_python_neural = 'OSQP_python_neural'
 
 # solvers = [ECOSSolver, GUROBISolver, MOSEKSolver, OSQPSolver]
@@ -108,6 +110,7 @@ SOLVER_MAP = {OSQP: OSQPSolver,
               Super_cg_precond_high: SuperADMMTricksSolver,
               OSQP_python: OSQPPythonSolver,
               OSQP_python_high: OSQPPythonSolver,
+              OSQP_python_aradmm: ARADMMOSQPSolver,
               OSQP_python_neural: NeuralOSQPSolver,
               }
 
@@ -461,6 +464,18 @@ settings = {
              'eps_prim_inf': 1e-15,  # Disable infeas check
              'eps_dual_inf': 1e-15,
              'warm_start': False
+       },
+       OSQP_python_aradmm: {
+             'max_iter': int(1e09),
+             'eps_abs': eps_low,
+             'eps_rel': eps_low,
+             'polish': False,
+             'verbose': False,
+             'eps_prim_inf': 1e-15,
+             'eps_dual_inf': 1e-15,
+             # Native residual-balancing adaptation must stay off: ARADMM
+             # updates rho and alpha through its spectral callback.
+             'adaptive_rho': False,
        },
        OSQP_python_neural: {
              'max_iter': int(1e09),

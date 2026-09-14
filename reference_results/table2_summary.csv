@@ -3,6 +3,7 @@ OSQP_python_no_arho,890.720000,0.744753242,0.000000,100
 OSQP_python_neural_mlp_scalar_no_arho_best_iter,733.380000,0.621088386,0.000000,100
 OSQP_python_neural_mlp_vector_no_arho_best_iter,730.930000,0.690983026,0.000000,100
 OSQP_python_arho,141.420000,0.169189656,1.070000,100
+OSQP_python_aradmm,355.370000,0.379750767,2.000000,100
 OSQP_python_neural_mlp_scalar_arho_best_iter,133.460000,0.167550464,1.060000,100
 OSQP_python_neural_mlp_scalar_arho_best_rho,139.690000,0.175547860,1.090000,100
 OSQP_python_neural_mlp_vector_arho_best_iter,126.470000,0.173939016,1.020000,100

@@ -2,7 +2,7 @@
 
 Produces a pivoted CSV matching the paper table layout:
   Rows    = problem types (Random QP, Portfolio, Lasso, SVM, Control)
-  Columns = 8 solver configs grouped under "no rho adapt" and "rho adapt"
+  Columns = 9 solver configs grouped under "no rho adapt" and "rho adapt"
   Cells   = "iter_mean (solve_time_mean)"
 """
 
@@ -30,6 +30,7 @@ COLUMNS = [
     ('scalar',           'OSQP_python_neural_mlp_scalar_no_arho_best_iter'),
     ('vector',           'OSQP_python_neural_mlp_vector_no_arho_best_iter'),
     ('osqp',             'OSQP_python_arho'),
+    ('ARADMM',           'OSQP_python_aradmm'),
     ('scalar best iter', 'OSQP_python_neural_mlp_scalar_arho_best_iter'),
     ('scalar best rho',  'OSQP_python_neural_mlp_scalar_arho_best_rho'),
     ('vector best iter', 'OSQP_python_neural_mlp_vector_arho_best_iter'),
@@ -82,7 +83,7 @@ for problem_dir in sorted(glob.glob(os.path.join(RESULTS_ROOT, '0324*_alpha_free
 with open(OUTPUT_CSV, 'w', newline='') as f:
     w = csv.writer(f)
     # Header row 1: group labels
-    w.writerow(['', 'no \\rho adapt', '', '', '\\rho adapt', '', '', '', ''])
+    w.writerow(['', 'no \\rho adapt', '', '', '\\rho adapt', '', '', '', '', ''])
     # Header row 2: column labels
     w.writerow([''] + [label for label, _ in COLUMNS])
     # Data rows

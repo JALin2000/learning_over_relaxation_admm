@@ -1,23 +1,21 @@
 '''
-Test neural OSQP vs baseline on all QP types.
+Test neural OSQP, ARADMM, and the OSQP baselines on all QP types.
 
-For each QP type, compares 14 solver configs:
+The default run compares the eight release configurations plus ARADMM.
+Use ``--aradmm-only`` to run only the new baseline without rerunning the
+existing Table 1 methods.
+
+For each QP type, the configurations are:
   1.  OSQP_python with adaptive_rho
-  2.  OSQP_python without adaptive_rho
+  2.  ARADMM (joint scalar rho and alpha adaptation)
+  3.  OSQP_python without adaptive_rho
   --- MLP ---
-  3.  Neural mlp scalar + arho (best_iter checkpoint)
-  4.  Neural mlp scalar + arho (best_rho checkpoint)
-  5.  Neural mlp vector + arho (best_iter checkpoint)
-  6.  Neural mlp vector + arho (best_rho checkpoint)
-  7.  Neural mlp scalar + no_arho (best_iter only)
-  8.  Neural mlp vector + no_arho (best_iter only)
-  --- GRU ---
-  9.  Neural gru scalar + arho (best_iter checkpoint)
-  10. Neural gru scalar + arho (best_rho checkpoint)
-  11. Neural gru vector + arho (best_iter checkpoint)
-  12. Neural gru vector + arho (best_rho checkpoint)
-  13. Neural gru scalar + no_arho (best_iter only)
-  14. Neural gru vector + no_arho (best_iter only)
+  4.  Neural mlp scalar + arho (best_iter checkpoint)
+  5.  Neural mlp scalar + arho (best_rho checkpoint)
+  6.  Neural mlp vector + arho (best_iter checkpoint)
+  7.  Neural mlp vector + arho (best_rho checkpoint)
+  8.  Neural mlp scalar + no_arho (best_iter only)
+  9.  Neural mlp vector + no_arho (best_iter only)
 '''
 
 import os
@@ -25,6 +23,7 @@ from functools import partial
 from benchmark_problems.example import Example
 import solvers.solvers as s
 from solvers.osqppurepy import OSQP as OSQPPythonSolver
+from solvers.aradmm import ARADMMOSQPSolver
 from learned_osqp.neural_osqp_solver import NeuralOSQPSolver
 from utils.general import gen_int_log_space
 from utils.benchmark_neural import compute_stats_info_split
@@ -42,18 +41,22 @@ parser.add_argument('--small', help='Use small test (fast)', default=False,
                     action='store_true')
 parser.add_argument('--mode', help='Run mode: benchmark or plot', default='benchmark',
                     choices=['benchmark', 'plot'])
+parser.add_argument('--aradmm-only', action='store_true',
+                    help='Run only ARADMM using the Table 1 problems/settings')
 args = parser.parse_args()
 high_accuracy = args.high_accuracy
 verbose = args.verbose
 parallel = args.parallel
 small_test = args.small
 mode = args.mode
+aradmm_only = args.aradmm_only
 
 print('high_accuracy:', high_accuracy)
 print('verbose:', verbose)
 print('parallel:', parallel)
 print('small test:', small_test)
 print('mode:', mode)
+print('ARADMM only:', aradmm_only)
 
 # Number of instances and dimensions
 if small_test:
@@ -205,41 +208,54 @@ for problem in problems:
     solver_names = []
 
     # ---- 1. OSQP_python with adaptive_rho ----
-    name = 'OSQP_python_arho'
-    s.SOLVER_MAP[name] = OSQPPythonSolver
-    s.settings[name] = _make_settings(adaptive_rho=True)
-    solver_names.append(name)
+    if not aradmm_only:
+        name = 'OSQP_python_arho'
+        s.SOLVER_MAP[name] = OSQPPythonSolver
+        s.settings[name] = _make_settings(adaptive_rho=True)
+        solver_names.append(name)
 
-    # ---- 2. OSQP_python without adaptive_rho ----
-    name = 'OSQP_python_no_arho'
-    s.SOLVER_MAP[name] = OSQPPythonSolver
+    # ---- 2. ARADMM: jointly adaptive scalar rho and scalar alpha ----
+    name = 'OSQP_python_aradmm'
+    s.SOLVER_MAP[name] = partial(
+        ARADMMOSQPSolver,
+        record_history=(mode == 'plot'),
+    )
+    # Disable OSQP's native residual-balancing update; ARADMM supplies rho.
     s.settings[name] = _make_settings(adaptive_rho=False)
     solver_names.append(name)
 
-    # ---- 3-14. Neural variants (mlp + gru) ----
-    for model_type in ['mlp']:
-        for arho in [True, False]:
-            arho_str = 'arho' if arho else 'no_arho'
-            # With adaptive_rho: test both best_iter and best_rho checkpoints
-            # Without adaptive_rho: best_rho is same as best_iter (0 rho updates), skip it
-            ckpt_types = ['best_iter', 'best_rho'] if arho else ['best_iter']
+    # ---- 3. OSQP_python without adaptive_rho ----
+    if not aradmm_only:
+        name = 'OSQP_python_no_arho'
+        s.SOLVER_MAP[name] = OSQPPythonSolver
+        s.settings[name] = _make_settings(adaptive_rho=False)
+        solver_names.append(name)
 
-            for alpha_mode in ['scalar', 'vector']:
-                for ckpt_type in ckpt_types:
-                    ckpt_path = _ckpt_path(qp_key, arho, alpha_mode,
-                                           model_type, ckpt_type)
+    # ---- 4-9. Neural variants ----
+    if not aradmm_only:
+        for model_type in ['mlp']:
+            for arho in [True, False]:
+                arho_str = 'arho' if arho else 'no_arho'
+                # With adaptive_rho: test both best_iter and best_rho checkpoints
+                # Without adaptive_rho: best_rho is same as best_iter (0 rho updates), skip it
+                ckpt_types = ['best_iter', 'best_rho'] if arho else ['best_iter']
 
-                    # Solver name must start with 'OSQP_python' for example.py branch
-                    name = f'OSQP_python_neural_{model_type}_{alpha_mode}_{arho_str}_{ckpt_type}'
-                    s.SOLVER_MAP[name] = partial(
-                        NeuralOSQPSolver,
-                        checkpoint_path=ckpt_path,
-                        alpha_mode=alpha_mode,
-                        model_type=model_type,
-                        record_history=(mode == 'plot'),
-                    )
-                    s.settings[name] = _make_settings(adaptive_rho=arho)
-                    solver_names.append(name)
+                for alpha_mode in ['scalar', 'vector']:
+                    for ckpt_type in ckpt_types:
+                        ckpt_path = _ckpt_path(qp_key, arho, alpha_mode,
+                                               model_type, ckpt_type)
+
+                        # Solver name must start with 'OSQP_python' for example.py branch
+                        name = f'OSQP_python_neural_{model_type}_{alpha_mode}_{arho_str}_{ckpt_type}'
+                        s.SOLVER_MAP[name] = partial(
+                            NeuralOSQPSolver,
+                            checkpoint_path=ckpt_path,
+                            alpha_mode=alpha_mode,
+                            model_type=model_type,
+                            record_history=(mode == 'plot'),
+                        )
+                        s.settings[name] = _make_settings(adaptive_rho=arho)
+                        solver_names.append(name)
 
     # ---- Cross-test: ckpt_arho != osqp_arho ----
     # solver_names += _register_cross_neural_solvers(qp_key)
